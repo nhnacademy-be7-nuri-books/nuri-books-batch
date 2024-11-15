@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: batch
+  profiles:
+    active: local
+
+server:
+  port: 8085
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://admin:1234@localhost:8761/eureka
+      #,http://admin:1234@localhost:8762/eureka
+  instance:
+    prefer-ip-address: true
+

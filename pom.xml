@@ -85,6 +85,7 @@
     </dependencies>
 
     <build>
+        <finalName>batch</finalName>
         <plugins>
             <plugin>
                 <groupId>org.asciidoctor</groupId>
