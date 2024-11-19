@@ -6,6 +6,13 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     type: org.apache.commons.dbcp2.BasicDataSource
 
+  datasource-meta:
+    url: jdbc:mysql://133.186.241.167:3306/nhn_academy_101
+    username: nhn_academy_101
+    password: mH9oewcq!
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    initialize-schema: always  # 배치 메타데이터 테이블 자동 생성
+
   jpa:
     hibernate:
       ddl-auto: update
@@ -17,4 +24,4 @@ spring:
 
 logging:
   level:
-    root: info
+    root: debug
