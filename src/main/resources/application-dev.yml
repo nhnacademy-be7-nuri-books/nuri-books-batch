@@ -1,9 +1,11 @@
 spring:
   datasource:
-    url: ENC(G/rh9H8G7vkNa2gWM40xVeBDfHcws8/a3d1RPpWULMKUtuGs2JptuCbARCNuVTkDXQr/dKqZaCqee/h35eVDFGpd2rSLRrDwAmcYZt9bAG74WrtOzZE6L6+HPClibGk3KZg5rQT1HSg=)
-    username: ENC(E7wzC9kl4nVwfEV7JsZ09WVAXwAQhSwy)
-    password: ENC(udeUrEU3cfiVaNkqv4zwgEhifPvD2iRzsL5Jr/E2/u4=)
+    url: jdbc:mysql://133.186.241.167:3306/project_be7_nuribooks_dev?useSSL=false&serverTimezone=UTC
+    username: be7_nuribooks
+    password: '@f3hgB7jc@KvWJQZ'
     driver-class-name: com.mysql.cj.jdbc.Driver
+    type: org.apache.commons.dbcp2.BasicDataSource
+
   jpa:
     hibernate:
       ddl-auto: update
