@@ -10,5 +10,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Member {
-	private Long id;
+	private Long customer_id;
+
+	@Override
+	public String toString() {
+		return "member_id= " + this.customer_id;
+	}
 }
