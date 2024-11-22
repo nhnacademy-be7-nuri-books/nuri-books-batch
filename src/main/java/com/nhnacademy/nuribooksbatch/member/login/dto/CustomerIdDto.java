@@ -7,5 +7,5 @@ import lombok.Setter;
 @Setter
 public class CustomerIdDto {
 
-    private Long customer_id;
+	private Long customer_id;
 }

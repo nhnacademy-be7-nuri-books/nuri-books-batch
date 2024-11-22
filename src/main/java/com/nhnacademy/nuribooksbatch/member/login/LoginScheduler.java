@@ -1,7 +1,8 @@
 package com.nhnacademy.nuribooksbatch.member.login;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.JobParametersInvalidException;
@@ -14,35 +15,42 @@ import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.Scheduled;
 
-import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.util.Date;
+import com.nhnacademy.nuribooksbatch.common.sender.MessageRequest;
+import com.nhnacademy.nuribooksbatch.common.sender.MessageSender;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Configuration
 @RequiredArgsConstructor
 public class LoginScheduler {
 
-    private final JobLauncher jobLauncher;
-    private final JobRegistry jobRegistry;
+	private final JobLauncher jobLauncher;
+	private final JobRegistry jobRegistry;
+	private final MessageSender messageSender;
 
-    @Scheduled(cron = "0 30 0 * * *", zone = "Asia/Seoul")
-    public void runInactiveMembersByLastLoginJob() {
+	@Scheduled(cron = "0 30 0 * * *", zone = "Asia/Seoul")
+	public void runInactiveMembersByLastLoginJob() {
 
-        try {
-            log.info("회원의 최근 로그인 일시를 확인하는 작업이 시작되었습니다 : {}", LocalDateTime.now());
+		try {
+			log.info("휴면 회원을 탐색하는 스케줄러가 시작되었습니다 : {}", LocalDateTime.now());
 
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh-mm-ss");
-            String date = dateFormat.format(new Date());
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH-mm-ss");
+			String formattedDate = LocalDateTime.now().format(formatter);
 
-            JobParameters jobParameters = new JobParametersBuilder()
-                    .addString("memberStatusUpdateDate", date)
-                    .toJobParameters();
+			JobParameters jobParameters = new JobParametersBuilder()
+				.addString("memberStatusUpdateDate", formattedDate)
+				.toJobParameters();
 
-            jobLauncher.run(jobRegistry.getJob("inactiveMembersByLastLoginJob"), jobParameters);
-        } catch (NoSuchJobException | JobInstanceAlreadyCompleteException | JobExecutionAlreadyRunningException |
-                JobParametersInvalidException | JobRestartException e) {
-            log.error("스케줄러 에러 : 회원의 최근 로그인 일시를 확인하는 작업에 문제가 생겼습니다 : {}", e.getMessage());
-        }
-    }
+			jobLauncher.run(jobRegistry.getJob("inactiveMembersByLastLoginJob"), jobParameters);
+
+		} catch (NoSuchJobException | JobInstanceAlreadyCompleteException | JobExecutionAlreadyRunningException
+				 | JobParametersInvalidException | JobRestartException e) {
+			log.error("스케줄러 에러 - 휴면 회원을 탐색하는 작업에 문제가 발생하였습니다. : {}", e.getMessage());
+			messageSender.sendMessage(new MessageRequest("배치 작업 실패",
+				"스케줄러 에러 - 휴면 회원을 탐색하는 작업에 문제가 발생하였습니다. "
+					+ "관리자는 해당 배치 작업을 확인하십시오. : " + e.getMessage()));
+		}
+	}
 }
