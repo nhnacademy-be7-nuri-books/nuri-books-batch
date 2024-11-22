@@ -27,7 +27,7 @@ public class TestController {
                 .toJobParameters();
 
         // 원하는 Job의 이름을 넣어주면 됨.
-        jobLauncher.run(jobRegistry.getJob("inactiveMembersByLastLogin"), jobParameters);
+        jobLauncher.run(jobRegistry.getJob("inactiveMembersByLastLoginJob"), jobParameters);
 
         return "OK";
     }

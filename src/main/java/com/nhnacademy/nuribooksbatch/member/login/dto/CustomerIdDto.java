@@ -1,4 +1,4 @@
-package com.nhnacademy.nuribooksbatch.member;
+package com.nhnacademy.nuribooksbatch.member.login.dto;
 
 import lombok.Getter;
 import lombok.Setter;
