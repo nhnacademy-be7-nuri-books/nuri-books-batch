@@ -41,6 +41,8 @@ public class BirthDayConfig {
 	@Scheduled(cron = "0 30 0 1 * *")
 	public void runJobAtScheduledTime() {
 		try {
+			//JobLauncher 는 Job 과 JobParameters 를 사용하여 Job 을 실행하는 객체
+			// JobParameter 는 JobInstance 를 구별하기 위한 파라미터
 			jobLauncher.run(birthdayCouponJob(sendCouponStep()), new JobParametersBuilder()
 				.addLong("time", System.currentTimeMillis())
 				.toJobParameters());
