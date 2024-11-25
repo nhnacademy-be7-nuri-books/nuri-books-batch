@@ -20,3 +20,16 @@ eureka:
   instance:
     prefer-ip-address: true
 
+
+logging:
+  level:
+    javax:
+      management:
+        remote:
+          rmi: off
+    sun:
+      rmi:
+        transport:
+          tcp: off
+        loader: off
+

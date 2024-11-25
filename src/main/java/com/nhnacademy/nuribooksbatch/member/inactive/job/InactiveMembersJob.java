@@ -1,8 +1,10 @@
-package com.nhnacademy.nuribooksbatch.member.login.job;
+package com.nhnacademy.nuribooksbatch.member.inactive.job;
 
+import java.sql.SQLException;
+
+import org.apache.http.conn.ConnectTimeoutException;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.StepExecutionListener;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
@@ -10,9 +12,13 @@ import org.springframework.batch.item.database.JdbcBatchItemWriter;
 import org.springframework.batch.item.database.JdbcPagingItemReader;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import com.nhnacademy.nuribooksbatch.member.login.dto.CustomerIdDto;
+import com.nhnacademy.nuribooksbatch.common.listener.JobLoggingListener;
+import com.nhnacademy.nuribooksbatch.common.listener.StepLoggingListener;
+import com.nhnacademy.nuribooksbatch.member.inactive.dto.InactiveCustomerIdDto;
+import com.nhnacademy.nuribooksbatch.member.inactive.listener.StatusWriterListener;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,11 +28,14 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class InactiveMembersJob {
 
+	private static final Integer CHUNK_SIZE = 10;
 	private final JobRepository jobRepository;
 	private final PlatformTransactionManager platformTransactionManager;
-	private final JdbcBatchItemWriter<CustomerIdDto> changeMembersStatusWriter;
-	private final JdbcPagingItemReader<CustomerIdDto> membersLastLoginReader;
-	private final StepExecutionListener stepLoggingListener;
+	private final JdbcBatchItemWriter<InactiveCustomerIdDto> changeMembersStatusWriter;
+	private final JdbcPagingItemReader<InactiveCustomerIdDto> membersLastLoginReader;
+	private final JobLoggingListener jobLoggingListener;
+	private final StepLoggingListener stepLoggingListener;
+	private final StatusWriterListener statusWriterListener;
 
 	// 최근 로그인 일시를 확인하는 Job을 정의한다.
 	@Bean
@@ -34,6 +43,7 @@ public class InactiveMembersJob {
 
 		return new JobBuilder("inactiveMembersByLastLoginJob", jobRepository)
 			.start(checkMembersLastLoginStep())
+			.listener(jobLoggingListener)
 			.build();
 	}
 
@@ -42,10 +52,16 @@ public class InactiveMembersJob {
 	public Step checkMembersLastLoginStep() {
 
 		return new StepBuilder("checkMembersLastLoginStep", jobRepository)
-			.<CustomerIdDto, CustomerIdDto>chunk(10, platformTransactionManager)
+			.<InactiveCustomerIdDto, InactiveCustomerIdDto>chunk(CHUNK_SIZE, platformTransactionManager)
 			.reader(membersLastLoginReader)
 			.writer(changeMembersStatusWriter)
+			.faultTolerant()
+			.retry(ConnectTimeoutException.class)
+			.retry(PessimisticLockingFailureException.class)
+			.noRetry(SQLException.class)
+			.retryLimit(2)
 			.listener(stepLoggingListener)
+			.listener(statusWriterListener)
 			.build();
 	}
 }

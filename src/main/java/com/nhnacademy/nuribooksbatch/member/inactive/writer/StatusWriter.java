@@ -1,4 +1,4 @@
-package com.nhnacademy.nuribooksbatch.member.login.writer;
+package com.nhnacademy.nuribooksbatch.member.inactive.writer;
 
 import javax.sql.DataSource;
 
@@ -8,7 +8,7 @@ import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilde
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.nhnacademy.nuribooksbatch.member.login.dto.CustomerIdDto;
+import com.nhnacademy.nuribooksbatch.member.inactive.dto.InactiveCustomerIdDto;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,11 +22,11 @@ public class StatusWriter {
 
 	// checkMembersLastLogin Step을 실행하는 Writer를 정의한다.
 	@Bean
-	public JdbcBatchItemWriter<CustomerIdDto> changeMemberStatusWriter() {
+	public JdbcBatchItemWriter<InactiveCustomerIdDto> changeMemberStatusWriter() {
 
 		String sql = "UPDATE members SET status = 'INACTIVE' WHERE customer_id = :customer_id";
 
-		return new JdbcBatchItemWriterBuilder<CustomerIdDto>()
+		return new JdbcBatchItemWriterBuilder<InactiveCustomerIdDto>()
 			.dataSource(dataSource)
 			.sql(sql)
 			.itemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<>())
