@@ -18,7 +18,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import com.nhnacademy.nuribooksbatch.common.listener.JobLoggingListener;
 import com.nhnacademy.nuribooksbatch.common.listener.StepLoggingListener;
 import com.nhnacademy.nuribooksbatch.member.withdraw.dto.WithdrawnCustomerIdDto;
-import com.nhnacademy.nuribooksbatch.member.withdraw.listener.SoftDeleteWriterListener;
+import com.nhnacademy.nuribooksbatch.member.withdraw.listener.SoftDeleteWriteListener;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,7 +35,7 @@ public class SoftDeleteMembersJob {
 	private final CompositeItemWriter<WithdrawnCustomerIdDto> softDeleteMembersWriter;
 	private final JobLoggingListener jobLoggingListener;
 	private final StepLoggingListener stepLoggingListener;
-	private final SoftDeleteWriterListener softDeleteWriterListener;
+	private final SoftDeleteWriteListener softDeleteWriteListener;
 
 	@Bean
 	public Job softDeleteMembersByWithdrawnStatusJob() {
@@ -59,7 +59,7 @@ public class SoftDeleteMembersJob {
 			.noRetry(SQLException.class)
 			.retryLimit(2)
 			.listener(stepLoggingListener)
-			.listener(softDeleteWriterListener)
+			.listener(softDeleteWriteListener)
 			.build();
 	}
 }

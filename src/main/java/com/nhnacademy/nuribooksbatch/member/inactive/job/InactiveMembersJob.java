@@ -18,7 +18,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import com.nhnacademy.nuribooksbatch.common.listener.JobLoggingListener;
 import com.nhnacademy.nuribooksbatch.common.listener.StepLoggingListener;
 import com.nhnacademy.nuribooksbatch.member.inactive.dto.InactiveCustomerIdDto;
-import com.nhnacademy.nuribooksbatch.member.inactive.listener.StatusWriterListener;
+import com.nhnacademy.nuribooksbatch.member.inactive.listener.StatusWriteListener;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,7 +35,7 @@ public class InactiveMembersJob {
 	private final JdbcPagingItemReader<InactiveCustomerIdDto> membersLastLoginReader;
 	private final JobLoggingListener jobLoggingListener;
 	private final StepLoggingListener stepLoggingListener;
-	private final StatusWriterListener statusWriterListener;
+	private final StatusWriteListener statusWriteListener;
 
 	// 최근 로그인 일시를 확인하는 Job을 정의한다.
 	@Bean
@@ -61,7 +61,7 @@ public class InactiveMembersJob {
 			.noRetry(SQLException.class)
 			.retryLimit(2)
 			.listener(stepLoggingListener)
-			.listener(statusWriterListener)
+			.listener(statusWriteListener)
 			.build();
 	}
 }
