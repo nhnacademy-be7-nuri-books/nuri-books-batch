@@ -30,7 +30,7 @@ public class GradeScheduler {
 	private final JobRegistry jobRegistry;
 	private final MessageSender messageSender;
 
-	@Scheduled(cron = "0 04 14 * * *", zone = "Asia/Seoul")
+	@Scheduled(cron = "0 15 0 1 */3 *", zone = "Asia/Seoul")
 	public void runInactiveMembersByLastLoginJob() {
 
 		try {
@@ -43,7 +43,7 @@ public class GradeScheduler {
 				.addString("memberGradeUpdateDate", formattedDate)
 				.toJobParameters();
 
-			jobLauncher.run(jobRegistry.getJob("updateMembersGradeJob"), jobParameters);
+			jobLauncher.run(jobRegistry.getJob("updateMembersGradeByTotalPaymentAmountJob"), jobParameters);
 
 		} catch (NoSuchJobException | JobInstanceAlreadyCompleteException | JobExecutionAlreadyRunningException
 				 | JobParametersInvalidException | JobRestartException e) {

@@ -26,6 +26,22 @@ public class TotalPaymentAmountReader {
 	private final DataSource dataSource;
 
 	@Bean
+	@Qualifier("standardMembersReader")
+	public JdbcPagingItemReader<GradeUpdateCustomerIdDto> standardMembersReader() {
+
+		return new JdbcPagingItemReaderBuilder<GradeUpdateCustomerIdDto>()
+			.name("standardMembersReader")
+			.dataSource(dataSource)
+			.selectClause("SELECT customer_id")
+			.fromClause("FROM members")
+			.whereClause("WHERE 0 <= total_payment_amount AND total_payment_amount < 100000")
+			.sortKeys(Map.of("customer_id", Order.ASCENDING))
+			.rowMapper(new BeanPropertyRowMapper<>(GradeUpdateCustomerIdDto.class))
+			.pageSize(PAGE_SIZE)
+			.build();
+	}
+
+	@Bean
 	@Qualifier("royalMembersReader")
 	public JdbcPagingItemReader<GradeUpdateCustomerIdDto> royalMembersReader() {
 
@@ -34,7 +50,7 @@ public class TotalPaymentAmountReader {
 			.dataSource(dataSource)
 			.selectClause("SELECT customer_id")
 			.fromClause("FROM members")
-			.whereClause("WHERE 100_000 <= total_payment_amount AND total_payment_amount < 200_000")
+			.whereClause("WHERE 100000 <= total_payment_amount AND total_payment_amount < 200000")
 			.sortKeys(Map.of("customer_id", Order.ASCENDING))
 			.rowMapper(new BeanPropertyRowMapper<>(GradeUpdateCustomerIdDto.class))
 			.pageSize(PAGE_SIZE)
@@ -50,7 +66,7 @@ public class TotalPaymentAmountReader {
 			.dataSource(dataSource)
 			.selectClause("SELECT customer_id")
 			.fromClause("FROM members")
-			.whereClause("WHERE 200_000 <= total_payment_amount AND total_payment_amount < 300_000")
+			.whereClause("WHERE 200000 <= total_payment_amount AND total_payment_amount < 300000")
 			.sortKeys(Map.of("customer_id", Order.ASCENDING))
 			.rowMapper(new BeanPropertyRowMapper<>(GradeUpdateCustomerIdDto.class))
 			.pageSize(PAGE_SIZE)
@@ -66,7 +82,7 @@ public class TotalPaymentAmountReader {
 			.dataSource(dataSource)
 			.selectClause("SELECT customer_id")
 			.fromClause("FROM members")
-			.whereClause("WHERE 300_000 <= total_payment_amount")
+			.whereClause("WHERE 300000 <= total_payment_amount")
 			.sortKeys(Map.of("customer_id", Order.ASCENDING))
 			.rowMapper(new BeanPropertyRowMapper<>(GradeUpdateCustomerIdDto.class))
 			.pageSize(PAGE_SIZE)

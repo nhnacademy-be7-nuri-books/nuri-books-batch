@@ -5,7 +5,7 @@ import org.springframework.batch.core.annotation.BeforeWrite;
 import org.springframework.batch.item.Chunk;
 import org.springframework.stereotype.Component;
 
-import com.nhnacademy.nuribooksbatch.member.inactive.dto.InactiveCustomerIdDto;
+import com.nhnacademy.nuribooksbatch.member.grade.dto.GradeUpdateCustomerIdDto;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -14,11 +14,12 @@ import lombok.extern.slf4j.Slf4j;
 public class GradeWriteListener {
 
 	@BeforeWrite
-	void beforeWrite(Chunk<? extends InactiveCustomerIdDto> items) {
+	void beforeWrite(Chunk<? extends GradeUpdateCustomerIdDto> items) {
 	}
 
 	@AfterWrite
-	void afterWrite(Chunk<? extends InactiveCustomerIdDto> items) {
-		items.forEach(customerIdDto -> log.info("등급이 업데이트된 customerId : {}", customerIdDto.getCustomer_id()));
+	void afterWrite(Chunk<? extends GradeUpdateCustomerIdDto> items) {
+		items.forEach(gradeUpdateCustomerIdDto ->
+			log.info("등급이 업데이트된 customerId : {}", gradeUpdateCustomerIdDto.getCustomer_id()));
 	}
 }

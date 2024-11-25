@@ -22,14 +22,28 @@ public class GradeWriter {
 	private final DataSource dataSource;
 
 	@Bean
+	@Qualifier("standardGradeWriter")
+	JdbcBatchItemWriter<GradeUpdateCustomerIdDto> standardGradeWriter() {
+
+		String standardGradeSql = "UPDATE members m "
+			+ "SET m.grade_id = (SELECT g.grade_id FROM grades g WHERE g.name = 'STANDARD'), "
+			+ "m.total_payment_amount = 0 "
+			+ "WHERE m.customer_id = :customer_id";
+
+		return new JdbcBatchItemWriterBuilder<GradeUpdateCustomerIdDto>()
+			.dataSource(dataSource)
+			.sql(standardGradeSql)
+			.itemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<>())
+			.build();
+	}
+
+	@Bean
 	@Qualifier("royalGradeWriter")
 	JdbcBatchItemWriter<GradeUpdateCustomerIdDto> royalGradeWriter() {
 
 		String royalGradeSql = "UPDATE members m "
-			+ "SET m.grade_id = "
-			+ "(SELECT g.grade_id "
-			+ "FROM grades g "
-			+ "WHERE g.name = 'ROYAL') "
+			+ "SET m.grade_id = (SELECT g.grade_id FROM grades g WHERE g.name = 'ROYAL'), "
+			+ "m.total_payment_amount = 0 "
 			+ "WHERE m.customer_id = :customer_id";
 
 		return new JdbcBatchItemWriterBuilder<GradeUpdateCustomerIdDto>()
@@ -44,10 +58,8 @@ public class GradeWriter {
 	JdbcBatchItemWriter<GradeUpdateCustomerIdDto> goldGradeWriter() {
 
 		String goldGradeSql = "UPDATE members m "
-			+ "SET m.grade_id = "
-			+ "(SELECT g.grade_id "
-			+ "FROM grades g "
-			+ "WHERE g.name = 'GOLD') "
+			+ "SET m.grade_id = (SELECT g.grade_id FROM grades g WHERE g.name = 'GOLD'), "
+			+ "m.total_payment_amount = 0 "
 			+ "WHERE m.customer_id = :customer_id";
 
 		return new JdbcBatchItemWriterBuilder<GradeUpdateCustomerIdDto>()
@@ -62,10 +74,8 @@ public class GradeWriter {
 	JdbcBatchItemWriter<GradeUpdateCustomerIdDto> platinumGradeWriter() {
 
 		String platinumGradeSql = "UPDATE members m "
-			+ "SET m.grade_id = "
-			+ "(SELECT g.grade_id "
-			+ "FROM grades g "
-			+ "WHERE g.name = 'PLATINUM') "
+			+ "SET m.grade_id = (SELECT g.grade_id FROM grades g WHERE g.name = 'PLATINUM'), "
+			+ "m.total_payment_amount = 0 "
 			+ "WHERE m.customer_id = :customer_id";
 
 		return new JdbcBatchItemWriterBuilder<GradeUpdateCustomerIdDto>()

@@ -10,6 +10,7 @@ import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.database.JdbcBatchItemWriter;
 import org.springframework.batch.item.database.JdbcPagingItemReader;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,16 +37,35 @@ public class UpdateMembersGradeJob {
 	private final StepLoggingListener stepLoggingListener;
 	private final GradeWriteListener gradeWriteListener;
 
+	@Autowired
+	@Qualifier("standardMembersReader")
+	JdbcPagingItemReader<GradeUpdateCustomerIdDto> standardMembersReader;
+
+	@Autowired
 	@Qualifier("royalMembersReader")
 	JdbcPagingItemReader<GradeUpdateCustomerIdDto> royalMembersReader;
+
+	@Autowired
 	@Qualifier("goldMembersReader")
 	JdbcPagingItemReader<GradeUpdateCustomerIdDto> goldMembersReader;
+
+	@Autowired
 	@Qualifier("platinumMembersReader")
 	JdbcPagingItemReader<GradeUpdateCustomerIdDto> platinumMembersReader;
+
+	@Autowired
+	@Qualifier("standardGradeWriter")
+	JdbcBatchItemWriter<GradeUpdateCustomerIdDto> standardGradeWriter;
+
+	@Autowired
 	@Qualifier("royalGradeWriter")
 	JdbcBatchItemWriter<GradeUpdateCustomerIdDto> royalGradeWriter;
+
+	@Autowired
 	@Qualifier("goldGradeWriter")
 	JdbcBatchItemWriter<GradeUpdateCustomerIdDto> goldGradeWriter;
+
+	@Autowired
 	@Qualifier("platinumGradeWriter")
 	JdbcBatchItemWriter<GradeUpdateCustomerIdDto> platinumGradeWriter;
 
@@ -53,14 +73,33 @@ public class UpdateMembersGradeJob {
 	public Job updateMembersGradeByTotalPaymentAmountJob() {
 
 		return new JobBuilder("updateMembersGradeByTotalPaymentAmountJob", jobRepository)
-			.start(royalMembersGradeUpdateStep())
+			.start(standardMembersGradeUpdateStep())
+			.next(royalMembersGradeUpdateStep())
 			.next(goldMembersGradeUpdateStep())
 			.next(platinumMembersGradeUpdateStep())
 			.listener(jobLoggingListener)
 			.build();
 	}
 
-	// 첫번째로 ROYAL 등급의 회원을 업데이트
+	// 첫번째로 STANDARD 등급의 회원을 업데이트
+	@Bean
+	public Step standardMembersGradeUpdateStep() {
+
+		return new StepBuilder("standardMembersGradeUpdateStep", jobRepository)
+			.<GradeUpdateCustomerIdDto, GradeUpdateCustomerIdDto>chunk(CHUNK_SIZE, platformTransactionManager)
+			.reader(standardMembersReader)
+			.writer(standardGradeWriter)
+			.faultTolerant()
+			.retry(ConnectTimeoutException.class)
+			.retry(PessimisticLockingFailureException.class)
+			.noRetry(SQLException.class)
+			.retryLimit(2)
+			.listener(stepLoggingListener)
+			.listener(gradeWriteListener)
+			.build();
+	}
+
+	// 두번째로 ROYAL 등급의 회원을 업데이트
 	@Bean
 	public Step royalMembersGradeUpdateStep() {
 
@@ -78,7 +117,7 @@ public class UpdateMembersGradeJob {
 			.build();
 	}
 
-	// 두번째로 GOLD 등급의 회원을 업데이트
+	// 세번째로 GOLD 등급의 회원을 업데이트
 	@Bean
 	public Step goldMembersGradeUpdateStep() {
 
@@ -96,7 +135,7 @@ public class UpdateMembersGradeJob {
 			.build();
 	}
 
-	// 세번째로 PLATINUM 등급의 회원을 업데이트
+	// 네번째로 PLATINUM 등급의 회원을 업데이트
 	@Bean
 	public Step platinumMembersGradeUpdateStep() {
 
