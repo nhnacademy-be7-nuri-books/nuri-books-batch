@@ -3,6 +3,9 @@ spring:
     name: batch
   profiles:
     active: local
+  batch:
+    job:
+      enabled: false
 
 server:
   port: 8085
@@ -16,4 +19,17 @@ eureka:
       #,http://admin:1234@localhost:8762/eureka
   instance:
     prefer-ip-address: true
+
+
+logging:
+  level:
+    javax:
+      management:
+        remote:
+          rmi: off
+    sun:
+      rmi:
+        transport:
+          tcp: off
+        loader: off
 
