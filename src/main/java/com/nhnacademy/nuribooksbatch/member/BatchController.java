@@ -59,4 +59,17 @@ public class BatchController {
 
 		return ResponseEntity.ok().build();
 	}
+
+	@GetMapping("/birthday")
+	public ResponseEntity<Void> issueBirthdayCouponByBirthdayCouponJob() throws Exception {
+
+		JobParameters jobParameters = new JobParametersBuilder()
+			.addString("controllerTest", LocalDateTime.now().toString())
+			.toJobParameters();
+
+		// 원하는 Job의 이름을 넣어주면 됨.
+		jobLauncher.run(jobRegistry.getJob("issueBirthdayCouponByBirthdayCouponJob"), jobParameters);
+
+		return ResponseEntity.ok().build();
+	}
 }
