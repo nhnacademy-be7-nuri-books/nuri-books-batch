@@ -33,7 +33,6 @@ public class WithdrawnStatusReader {
 			.selectClause("SELECT customer_id")
 			.fromClause("FROM members")
 			.whereClause("WHERE status = 'WITHDRAWN' AND withdrawn_at <= DATE_SUB(CURRENT_DATE, INTERVAL 1 YEAR)")
-			// .whereClause("WHERE username = 'member27'")
 			.sortKeys(Map.of("customer_id", Order.ASCENDING))
 			.rowMapper(new BeanPropertyRowMapper<>(WithdrawnCustomerIdDto.class))
 			.pageSize(PAGE_SIZE)

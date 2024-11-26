@@ -11,7 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
-public class StatusWriterListener {
+public class StatusWriteListener {
 
 	@BeforeWrite
 	void beforeWrite(Chunk<? extends InactiveCustomerIdDto> items) {

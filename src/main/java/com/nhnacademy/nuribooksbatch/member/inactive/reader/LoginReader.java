@@ -34,7 +34,6 @@ public class LoginReader {
 			.selectClause("SELECT customer_id")
 			.fromClause("FROM members")
 			.whereClause("WHERE status = 'ACTIVE' AND latest_login_at <= DATE_SUB(CURRENT_DATE, INTERVAL 3 MONTH)")
-			// .whereClause("WHERE username = 'member27'")
 			.sortKeys(Map.of("customer_id", Order.ASCENDING))
 			.rowMapper(new BeanPropertyRowMapper<>(InactiveCustomerIdDto.class))
 			.pageSize(PAGE_SIZE)

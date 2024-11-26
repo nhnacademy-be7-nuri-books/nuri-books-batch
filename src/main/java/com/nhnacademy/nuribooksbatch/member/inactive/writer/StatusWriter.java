@@ -24,7 +24,8 @@ public class StatusWriter {
 	@Bean
 	public JdbcBatchItemWriter<InactiveCustomerIdDto> changeMemberStatusWriter() {
 
-		String sql = "UPDATE members SET status = 'INACTIVE' WHERE customer_id = :customer_id";
+		String sql = "UPDATE members SET status = 'INACTIVE', total_payment_amount = 0 "
+			+ "WHERE customer_id = :customer_id";
 
 		return new JdbcBatchItemWriterBuilder<InactiveCustomerIdDto>()
 			.dataSource(dataSource)

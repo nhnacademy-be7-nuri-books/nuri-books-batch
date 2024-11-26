@@ -11,7 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
-public class SoftDeleteWriterListener {
+public class SoftDeleteWriteListener {
 
 	@BeforeWrite
 	void beforeWrite(Chunk<? extends WithdrawnCustomerIdDto> items) {
