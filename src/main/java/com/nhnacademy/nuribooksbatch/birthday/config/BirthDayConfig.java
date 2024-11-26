@@ -7,10 +7,14 @@ import javax.sql.DataSource;
 
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParametersBuilder;
+import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
+import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.Chunk;
 import org.springframework.batch.item.ItemWriter;
@@ -26,6 +30,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import com.nhnacademy.nuribooksbatch.birthday.domain.Member;
+import com.nhnacademy.nuribooksbatch.common.sender.MessageRequest;
+import com.nhnacademy.nuribooksbatch.common.sender.MessageSender;
 
 import lombok.RequiredArgsConstructor;
 
@@ -37,6 +43,7 @@ public class BirthDayConfig {
 	private final JobRepository jobRepository;
 	private final PlatformTransactionManager platformTransactionManager;
 	private final JobLauncher jobLauncher;
+	private final MessageSender messageSender;
 
 	@Scheduled(cron = "0 30 0 1 * *")
 	public void runJobAtScheduledTime() {
@@ -46,8 +53,11 @@ public class BirthDayConfig {
 			jobLauncher.run(birthdayCouponJob(sendCouponStep()), new JobParametersBuilder()
 				.addLong("time", System.currentTimeMillis())
 				.toJobParameters());
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (JobInstanceAlreadyCompleteException | JobExecutionAlreadyRunningException
+				 | JobParametersInvalidException | JobRestartException e) {
+			messageSender.sendMessage(new MessageRequest("누리북스 배치 알림봇",
+				"스케줄러 에러 - 생일 쿠폰 발행 작업에 문제가 발생하였습니다. "
+					+ "관리자는 해당 배치 작업을 확인하십시오. : " + e.getMessage()));
 		}
 	}
 
@@ -77,7 +87,6 @@ public class BirthDayConfig {
 		queryProvider.setFromClause("FROM members");
 		queryProvider.setSortKeys(sortKeys);
 
-		// String currentMonthCondition = "WHERE MONTH(birthday) = MONTH(CURRENT_DATE())";
 		String currentMonthCondition = "WHERE MONTH(birthday) = MONTH(CURRENT_DATE())";
 		queryProvider.setWhereClause(currentMonthCondition);
 
