@@ -22,7 +22,7 @@ public class BatchController {
 	private final JobRegistry jobRegistry;
 
 	@GetMapping("/inactive")
-	public ResponseEntity<Void> inactiveBatchTest() throws Exception {
+	public ResponseEntity<Void> inactiveMembersByLastLoginJob() throws Exception {
 
 		JobParameters jobParameters = new JobParametersBuilder()
 			.addString("controllerTest", LocalDateTime.now().toString())
@@ -35,7 +35,7 @@ public class BatchController {
 	}
 
 	@GetMapping("/withdraw")
-	public ResponseEntity<Void> softDeleteBatchTest() throws Exception {
+	public ResponseEntity<Void> softDeleteMembersByWithdrawnStatusJob() throws Exception {
 
 		JobParameters jobParameters = new JobParametersBuilder()
 			.addString("controllerTest", LocalDateTime.now().toString())
@@ -48,7 +48,7 @@ public class BatchController {
 	}
 
 	@GetMapping("/grade")
-	public ResponseEntity<Void> gradeUpdateBatchTest() throws Exception {
+	public ResponseEntity<Void> updateMembersGradeByTotalPaymentAmountJob() throws Exception {
 
 		JobParameters jobParameters = new JobParametersBuilder()
 			.addString("controllerTest", LocalDateTime.now().toString())
