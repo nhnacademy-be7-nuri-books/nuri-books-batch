@@ -63,7 +63,7 @@ public class BirthDayConfig {
 
 	@Bean
 	public Job birthdayCouponJob(Step sendCouponStep) {
-		return new JobBuilder("birthdayCouponJob", jobRepository)
+		return new JobBuilder("issueBirthdayCouponByBirthdayCouponJob", jobRepository)
 			.start(sendCouponStep)
 			.build();
 	}
