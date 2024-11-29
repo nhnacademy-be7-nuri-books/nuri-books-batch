@@ -24,7 +24,6 @@ import org.springframework.batch.item.database.builder.JdbcPagingItemReaderBuild
 import org.springframework.batch.item.database.support.MySqlPagingQueryProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -95,7 +94,7 @@ public class BirthDayConfig {
 			.dataSource(dataSource)
 			.pageSize(100)
 			.queryProvider(queryProvider)
-			.rowMapper(new BeanPropertyRowMapper<>(Member.class))
+			.rowMapper(new MemberRowMapper())
 			.build();
 	}
 
@@ -115,10 +114,10 @@ public class BirthDayConfig {
 						String insertSql =
 							"INSERT INTO member_coupons (customer_id, coupon_id, created_at, expired_at, is_used) " +
 								"VALUES (?, ?, NOW(), LAST_DAY(CURDATE()), false)";
-						jdbcTemplate.update(insertSql, member.getCustomer_id(), couponId);
+						jdbcTemplate.update(insertSql, member.getCustomerId(), couponId);
 
 						System.out.println(
-							"쿠폰 발급: customer_id = " + member.getCustomer_id() + ", coupon_id = " + couponId);
+							"쿠폰 발급: customer_id = " + member.getCustomerId() + ", coupon_id = " + couponId);
 					} else {
 						System.out.println("활성화된 생일 쿠폰이 없습니다.");
 					}
