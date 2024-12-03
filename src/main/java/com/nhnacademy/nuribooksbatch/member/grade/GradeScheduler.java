@@ -43,7 +43,7 @@ public class GradeScheduler {
 				.addString("memberGradeUpdateDate", formattedDate)
 				.toJobParameters();
 
-			jobLauncher.run(jobRegistry.getJob("updateMembersGradeByTotalPaymentAmountJob"), jobParameters);
+			jobLauncher.run(jobRegistry.getJob("updateMembersGradeByTotalPaymentAmountNewJob"), jobParameters);
 
 		} catch (NoSuchJobException | JobInstanceAlreadyCompleteException | JobExecutionAlreadyRunningException
 				 | JobParametersInvalidException | JobRestartException e) {

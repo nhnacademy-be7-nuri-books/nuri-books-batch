@@ -55,7 +55,7 @@ public class BatchController {
 			.toJobParameters();
 
 		// 원하는 Job의 이름을 넣어주면 됨.
-		jobLauncher.run(jobRegistry.getJob("updateMembersGradeByTotalPaymentAmountJob"), jobParameters);
+		jobLauncher.run(jobRegistry.getJob("updateMembersGradeByTotalPaymentAmountNewJob"), jobParameters);
 
 		return ResponseEntity.ok().build();
 	}
