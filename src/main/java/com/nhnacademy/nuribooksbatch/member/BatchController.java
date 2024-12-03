@@ -48,7 +48,7 @@ public class BatchController {
 	}
 
 	@GetMapping("/grade")
-	public ResponseEntity<Void> updateMembersGradeByTotalPaymentAmountJob() throws Exception {
+	public ResponseEntity<Void> updateMembersGradeByTotalPaymentAmountNewJob() throws Exception {
 
 		JobParameters jobParameters = new JobParametersBuilder()
 			.addString("controllerTest", LocalDateTime.now().toString())

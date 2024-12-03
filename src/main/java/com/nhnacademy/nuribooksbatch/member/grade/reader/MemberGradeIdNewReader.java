@@ -29,6 +29,11 @@ public class MemberGradeIdNewReader implements ItemReader<MemberGradeBatchDto> {
 			iterator = batchList.iterator();
 		}
 
-		return iterator.hasNext() ? iterator.next() : null;
+		if (!iterator.hasNext()) {
+			batchList = null;
+			return null;
+		}
+
+		return iterator.next();
 	}
 }
