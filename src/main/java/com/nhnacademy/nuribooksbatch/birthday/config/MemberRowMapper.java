@@ -10,13 +10,9 @@ import com.nhnacademy.nuribooksbatch.birthday.domain.Member;
 public class MemberRowMapper implements RowMapper<Member> {
 	@Override
 	public Member mapRow(ResultSet rs, int rowNum) throws SQLException {
-		Member member = Member.builder()
+		return Member.builder()
 			.customerId(rs.getLong("customer_id"))
 			.build();
-
-		System.out.println("Row " + rowNum + ": " + member);
-
-		return member;
 	}
 }
 
