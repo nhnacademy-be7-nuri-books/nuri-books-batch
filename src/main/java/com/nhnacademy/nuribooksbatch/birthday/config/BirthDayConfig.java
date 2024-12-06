@@ -47,8 +47,7 @@ public class BirthDayConfig {
 	private final JobLauncher jobLauncher;
 	private final MessageSender messageSender;
 
-	// @Scheduled(cron = "0 30 0 1 * ?")
-	@Scheduled(cron = "0 26 13 6 12 ?")
+	@Scheduled(cron = "0 30 0 1 * ?")
 	public void runJobAtScheduledTime() {
 		try {
 			jobLauncher.run(birthdayCouponJob(sendCouponStep()), new JobParametersBuilder()
@@ -107,7 +106,7 @@ public class BirthDayConfig {
 
 			@Override
 			public void write(Chunk<? extends Member> items) {
-				Long couponId = null;
+				Long couponId;
 
 				// 쿠폰 조회
 				String sql = "SELECT coupon_id FROM coupons WHERE expire_date IS NULL " +
