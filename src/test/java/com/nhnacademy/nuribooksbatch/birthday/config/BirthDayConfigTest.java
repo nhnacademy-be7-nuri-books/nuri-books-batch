@@ -3,6 +3,8 @@ package com.nhnacademy.nuribooksbatch.birthday.config;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -62,6 +64,10 @@ class BirthDayConfigTest {
 
 	@InjectMocks
 	private BirthDayConfig birthDayConfig;
+	@Mock
+	private ResultSet resultSet;
+
+	private MemberRowMapper memberRowMapper;
 
 	@BeforeEach
 	void setUp() {
@@ -85,6 +91,8 @@ class BirthDayConfigTest {
 		itemReader.setQueryProvider(queryProvider);
 		itemReader.setRowMapper(new MemberRowMapper());
 
+		memberRowMapper = new MemberRowMapper();
+
 	}
 
 	@Test
@@ -104,14 +112,27 @@ class BirthDayConfigTest {
 	}
 
 	@Test
+	void runJobAtScheduledTime_ShouldSendErrorNotification_WhenExceptionOccurs() throws
+		JobInstanceAlreadyCompleteException,
+		JobExecutionAlreadyRunningException,
+		JobParametersInvalidException,
+		JobRestartException {
+		when(jobLauncher.run(any(), any())).thenThrow(JobExecutionAlreadyRunningException.class);
+
+		birthDayConfig.runJobAtScheduledTime();
+
+		verify(messageSender, times(1)).sendMessage(any());
+	}
+
+	@Test
 	void birthdayCouponJob() {
 		Step sendCouponStep = birthDayConfig.sendCouponStep();
 
-		Job job = birthDayConfig.birthdayCouponJob(sendCouponStep);
+		Job birthdayCouponJob = birthDayConfig.birthdayCouponJob(sendCouponStep);
 
-		assertNotNull(job);
+		assertNotNull(birthdayCouponJob);
 
-		assertEquals("issueBirthdayCouponByBirthdayCouponJob", job.getName());
+		assertEquals("issueBirthdayCouponByBirthdayCouponJob", birthdayCouponJob.getName());
 		assertNotNull(sendCouponStep);
 		assertEquals("sendCouponStep", sendCouponStep.getName());
 	}
@@ -124,11 +145,18 @@ class BirthDayConfigTest {
 		assertEquals("sendCouponStep", step.getName());
 
 		step.getStartLimit();
-
 	}
 
 	@Test
-	void testItemReaderRead() throws Exception {
-		
+	void mapRow_ShouldMapResultSetToMember() throws SQLException {
+		// Given
+		when(resultSet.getLong("customer_id")).thenReturn(1L);
+
+		// When
+		Member member = memberRowMapper.mapRow(resultSet, 1);
+
+		// Then
+		assertNotNull(member);
+		assertEquals(1L, member.getCustomerId());
 	}
 }

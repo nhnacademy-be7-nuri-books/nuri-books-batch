@@ -106,7 +106,7 @@ public class BirthDayConfig {
 
 			@Override
 			public void write(Chunk<? extends Member> items) {
-				Long couponId = null;
+				Long couponId;
 
 				// 쿠폰 조회
 				String sql = "SELECT coupon_id FROM coupons WHERE expire_date IS NULL " +
@@ -127,6 +127,17 @@ public class BirthDayConfig {
 
 				// 쿠폰 발급
 				for (Member member : items) {
+					String checkCouponSql =
+						"SELECT COUNT(*) FROM member_coupons WHERE customer_id = ? AND coupon_id = ?";
+
+					Integer count = jdbcTemplate.queryForObject(checkCouponSql, Integer.class, member.getCustomerId(),
+						couponId);
+
+					if (count != null && count > 0) {
+						log.info("멤버 {}는 이미 생일 쿠폰을 가지고 있습니다.", member.getCustomerId());
+						continue;
+					}
+
 					String insertSql =
 						"INSERT INTO member_coupons (customer_id, coupon_id, created_at, expired_at, is_used) " +
 							"VALUES (?, ?, NOW(), LAST_DAY(CURDATE()), false)";
