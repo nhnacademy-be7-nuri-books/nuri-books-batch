@@ -47,7 +47,8 @@ public class BirthDayConfig {
 	private final JobLauncher jobLauncher;
 	private final MessageSender messageSender;
 
-	@Scheduled(cron = "0 30 0 1 * ?")
+	// @Scheduled(cron = "0 30 0 1 * ?")
+	@Scheduled(cron = "0 26 13 6 12 ?")
 	public void runJobAtScheduledTime() {
 		try {
 			jobLauncher.run(birthdayCouponJob(sendCouponStep()), new JobParametersBuilder()
@@ -127,6 +128,17 @@ public class BirthDayConfig {
 
 				// 쿠폰 발급
 				for (Member member : items) {
+					String checkCouponSql =
+						"SELECT COUNT(*) FROM member_coupons WHERE customer_id = ? AND coupon_id = ?";
+
+					Integer count = jdbcTemplate.queryForObject(checkCouponSql, Integer.class, member.getCustomerId(),
+						couponId);
+
+					if (count != null && count > 0) {
+						log.info("멤버 {}는 이미 생일 쿠폰을 가지고 있습니다.", member.getCustomerId());
+						continue;
+					}
+
 					String insertSql =
 						"INSERT INTO member_coupons (customer_id, coupon_id, created_at, expired_at, is_used) " +
 							"VALUES (?, ?, NOW(), LAST_DAY(CURDATE()), false)";

@@ -107,11 +107,11 @@ class BirthDayConfigTest {
 	void birthdayCouponJob() {
 		Step sendCouponStep = birthDayConfig.sendCouponStep();
 
-		Job job = birthDayConfig.birthdayCouponJob(sendCouponStep);
+		Job birthdayCouponJob = birthDayConfig.birthdayCouponJob(sendCouponStep);
 
-		assertNotNull(job);
+		assertNotNull(birthdayCouponJob);
 
-		assertEquals("issueBirthdayCouponByBirthdayCouponJob", job.getName());
+		assertEquals("issueBirthdayCouponByBirthdayCouponJob", birthdayCouponJob.getName());
 		assertNotNull(sendCouponStep);
 		assertEquals("sendCouponStep", sendCouponStep.getName());
 	}
@@ -127,8 +127,4 @@ class BirthDayConfigTest {
 
 	}
 
-	@Test
-	void testItemReaderRead() throws Exception {
-		
-	}
 }
