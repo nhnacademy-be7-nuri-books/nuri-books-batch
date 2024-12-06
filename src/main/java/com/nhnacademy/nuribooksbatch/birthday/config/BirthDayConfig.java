@@ -24,6 +24,7 @@ import org.springframework.batch.item.database.builder.JdbcPagingItemReaderBuild
 import org.springframework.batch.item.database.support.MySqlPagingQueryProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -33,7 +34,9 @@ import com.nhnacademy.nuribooksbatch.common.sender.MessageRequest;
 import com.nhnacademy.nuribooksbatch.common.sender.MessageSender;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Configuration
 @RequiredArgsConstructor
 public class BirthDayConfig {
@@ -44,11 +47,9 @@ public class BirthDayConfig {
 	private final JobLauncher jobLauncher;
 	private final MessageSender messageSender;
 
-	@Scheduled(cron = "0 30 0 1 * *")
+	@Scheduled(cron = "0 30 0 1 * ?")
 	public void runJobAtScheduledTime() {
 		try {
-			//JobLauncher 는 Job 과 JobParameters 를 사용하여 Job 을 실행하는 객체
-			// JobParameter 는 JobInstance 를 구별하기 위한 파라미터
 			jobLauncher.run(birthdayCouponJob(sendCouponStep()), new JobParametersBuilder()
 				.addLong("time", System.currentTimeMillis())
 				.toJobParameters());
@@ -105,25 +106,49 @@ public class BirthDayConfig {
 
 			@Override
 			public void write(Chunk<? extends Member> items) {
+				Long couponId;
+
+				// 쿠폰 조회
+				String sql = "SELECT coupon_id FROM coupons WHERE expire_date IS NULL " +
+					"AND (name LIKE '%birthday%' OR name LIKE '%생일%') LIMIT 1";
+				try {
+					couponId = jdbcTemplate.queryForObject(sql, Long.class);
+				} catch (DataAccessException e) {
+					log.error("쿠폰 조회 중 오류 발생", e);
+					sendErrorNotification("쿠폰 조회 중 문제가 발생하였습니다. 관리자는 해당 배치 작업을 확인하십시오.");
+					return;
+				}
+
+				if (couponId == null) {
+					log.warn("생일 쿠폰이 존재하지 않습니다.");
+					sendErrorNotification("생일 쿠폰이 존재하지 않습니다. 관리자는 해당 배치 작업을 확인하십시오.");
+					return;
+				}
+
+				// 쿠폰 발급
 				for (Member member : items) {
-					String sql = "SELECT coupon_id FROM coupons WHERE expire_date IS NULL " +
-						"AND (name LIKE '%birthday%' OR name LIKE '%생일%') LIMIT 1";
-					Long couponId = jdbcTemplate.queryForObject(sql, Long.class);
+					String checkCouponSql =
+						"SELECT COUNT(*) FROM member_coupons WHERE customer_id = ? AND coupon_id = ?";
 
-					if (couponId != null) {
-						String insertSql =
-							"INSERT INTO member_coupons (customer_id, coupon_id, created_at, expired_at, is_used) " +
-								"VALUES (?, ?, NOW(), LAST_DAY(CURDATE()), false)";
-						jdbcTemplate.update(insertSql, member.getCustomerId(), couponId);
+					Integer count = jdbcTemplate.queryForObject(checkCouponSql, Integer.class, member.getCustomerId(),
+						couponId);
 
-						System.out.println(
-							"쿠폰 발급: customer_id = " + member.getCustomerId() + ", coupon_id = " + couponId);
-					} else {
-						System.out.println("활성화된 생일 쿠폰이 없습니다.");
+					if (count != null && count > 0) {
+						log.info("멤버 {}는 이미 생일 쿠폰을 가지고 있습니다.", member.getCustomerId());
+						continue;
 					}
+
+					String insertSql =
+						"INSERT INTO member_coupons (customer_id, coupon_id, created_at, expired_at, is_used) " +
+							"VALUES (?, ?, NOW(), LAST_DAY(CURDATE()), false)";
+					jdbcTemplate.update(insertSql, member.getCustomerId(), couponId);
 				}
 			}
 
+			private void sendErrorNotification(String message) {
+				messageSender.sendMessage(new MessageRequest("누리북스 배치 알림봇",
+					"스케줄러 에러 - 생일 쿠폰 발행 작업에 문제가 발생하였습니다. " + message));
+			}
 		};
 	}
 }
